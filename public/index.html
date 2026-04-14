@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIM vs HER Showdown — Leaderboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:#000;min-height:100vh;}
+.wrap{background:#000;padding:24px 40px 60px;max-width:1100px;margin:0 auto;font-family:'Barlow',sans-serif;}
+.hdr{text-align:center;padding:28px 0 32px;margin-bottom:40px;border-bottom:1px solid #1c1c1c;}
+.show-title{font-size:64px;letter-spacing:6px;line-height:1;font-family:'Bebas Neue',sans-serif;}
+.show-sub{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:8px;color:#c8a84b;margin-top:6px;}
+.tiktok-tag{color:#fff;font-size:12px;letter-spacing:2px;margin-top:10px;}
+.status{text-align:center;margin-bottom:32px;font-size:12px;letter-spacing:1px;color:#555;}
+.sec{margin-bottom:52px;}
+.sec-hdr{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+.sec-hdr h2{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:#fff;font-weight:400;white-space:nowrap;}
+.sec-rule{flex:1;height:1px;background:#1a1a1a;}
+.chart-box{position:relative;width:100%;}
+.loading{text-align:center;padding:60px;color:#444;font-size:14px;}
+.err{text-align:center;padding:40px;color:#c0392b;font-size:13px;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+thead th{color:#c8a84b;font-weight:500;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:12px 8px;text-align:left;border-bottom:1px solid #1e1e1e;background:#0a0a0a;}
+tbody tr{border-bottom:1px solid #0f0f0f;}
+tbody tr:nth-child(even){background:#060606;}
+tbody tr:hover{background:#111;}
+tbody td{padding:10px 8px;color:#bbb;font-size:13px;}
+td.rank{color:#444;font-size:11px;width:28px;padding-right:4px;}
+td.uname{color:#fff;font-weight:500;word-break:break-all;}
+td.coins{color:#c8a84b;font-weight:500;white-space:nowrap;}
+td.rec{white-space:nowrap;}
+.wbadge{display:inline-block;background:#0d2e0d;color:#4ade80;font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500;}
+.disclaimer{text-align:center;color:#2a2a2a;font-size:11px;line-height:1.6;padding-top:24px;border-top:1px solid #0f0f0f;margin-top:8px;}
+@media(max-width:600px){.wrap{padding:16px 16px 40px;}.show-title{font-size:42px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="show-title"><span style="color:#4a9eff;">HIM</span><span style="color:#c8a84b;font-size:48px;"> VS </span><span style="color:#ff4a6b;">HER</span></div>
+    <div class="show-sub">SHOWDOWN</div>
+    <div class="tiktok-tag">@imleafaye &nbsp;·&nbsp; TIKTOK LIVE</div>
+  </div>
+  <div class="status" id="status">Loading live data...</div>
+  <div class="sec"><div class="sec-hdr"><h2>💎 Top 10 Coins Overall</h2><div class="sec-rule"></div></div><div class="chart-box" style="height:320px;"><canvas id="c1"></canvas></div></div>
+  <div class="sec"><div class="sec-hdr"><h2>⚡ Top Diamonds Per Single Show Day</h2><div class="sec-rule"></div></div><div class="chart-box" style="height:320px;"><canvas id="c2"></canvas></div></div>
+  <div class="sec"><div class="sec-hdr"><h2>🏆 Top # of Wins</h2><div class="sec-rule"></div></div><div class="chart-box" style="height:520px;"><canvas id="c3"></canvas></div></div>
+  <div class="sec"><div class="sec-hdr"><h2>📋 All Contestants</h2><div class="sec-rule"></div></div><div id="tblwrap"><div class="loading">Loading...</div></div></div>
+  <p class="disclaimer">* Numbers may not be 100% up to date. TikTok coin analytics can experience delays in updating.</p>
+</div>
+<script>
+const COLORS=['#4a9eff','#ff4a6b','#c8a84b','#ff7a3d','#a78bfa','#34d399','#f472b6','#60a5fa','#fb923c','#4ade80','#f87171','#e879f9','#38bdf8','#facc15'];
+function opts(lbl){return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>c.parsed.y.toLocaleString()+' '+lbl}}},scales:{x:{ticks:{color:'#666',font:{size:12},maxRotation:40,autoSkip:false},grid:{color:'#111'},border:{color:'#1a1a1a'}},y:{ticks:{color:'#555',font:{size:12},callback:(v)=>v>=1000?(v/1000).toFixed(0)+'k':v},grid:{color:'#111'},border:{color:'#1a1a1a'}}}};}
+let c1,c2,c3;
+async function load(){
+  try{
+    const r=await fetch('/api/leaderboard');
+    const json=await r.json();
+    if(!json.success) throw new Error(jso
