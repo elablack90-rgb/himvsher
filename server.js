@@ -36,10 +36,13 @@ app.get('/api/leaderboard', async (req, res) => {
     }
 
     const allSubitemIds = Object.keys(subitemToContestant);
-    const BATCH = 100;
-
+    const BATCH = 50;
+    const batches = [];
     for (let i = 0; i < allSubitemIds.length; i += BATCH) {
-      const batch = allSubitemIds.slice(i, i + BATCH);
+      batches.push(allSubitemIds.slice(i, i + BATCH));
+    }
+
+    await Promise.all(batches.map(async (batch) => {
       const subRes = await fetch('https://api.monday.com/v2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': MONDAY_TOKEN, 'API-Version': '2024-01' },
@@ -56,7 +59,7 @@ app.get('/api/leaderboard', async (req, res) => {
         if (isWin) contestantMap[cId].wins += 1;
         if (pts > contestantMap[cId].maxSingle) contestantMap[cId].maxSingle = pts;
       }
-    }
+    }));
 
     const results = Object.values(contestantMap).sort((a, b) => b.total - a.total);
     res.json({ success: true, data: results, updatedAt: new Date().toISOString() });
